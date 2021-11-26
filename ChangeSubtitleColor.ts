@@ -1,85 +1,85 @@
-interfaceInicial();
+let readline = require('readline');
 
 var subtitleColor = "";
 
-function interfaceInicial(){
+var subtitleName = "";
 
-    let readline = require('readline');
-    
+function initialInterface() {
+
     let rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+        input: process.stdin,
+        output: process.stdout
     });
 
-    rl.question("Digite o código Hexadecimal da cor desejada para a legenda: ", function(subtitleColor) {
-        geraLegendaModificada();
-    rl.close();
+
+    rl.question("Digite o código Hexadecimal da cor desejada para a legenda (com #): ", (subtitleColor) => {
+
+        rl.question("Digite o nome da legenda que pretende modificar (com o formato): ", (subtitleName) => {
+
+            generateModifiedSubtitle(subtitleColor,subtitleName);
+
+            rl.close();
+
+        });
+
     });
 
 }
 
-
-function geraLegendaModificada(){
+function generateModifiedSubtitle(subtitleColor, subtitleName) {
 
     const fs = require('fs');
 
-    fs.readFile('SpiritedAway.srt', function (err, data) {
+    fs.readFile(subtitleName, function (err, data) {
 
-    if (err) throw err;
+        if (err) throw err;
 
-    const arr = data.toString().replace(/\r\n/g, '\n').split('\n');
+        const arr = data.toString().replace(/\r\n/g, '\n').split('\n');
 
-    let auxiliar = "";
+        let modifiedSubtitle = arr.slice();
 
-    let legendaModificada = arr.slice();
+        let regexFormatTime = new RegExp('[0-9]{2}[:][0-9]{2}[:][0-9]{2}[,][0-9]{3}');
+        
+        let regexFormatColor = new RegExp('</font>');
 
-    let regexFormatTime = new RegExp('[0-9]{2}[:][0-9]{2}[:][0-9]{2}[,][0-9]{3}');
-    let regexFormatColor = new RegExp('</font>');
+        for (let i of modifiedSubtitle) {
+
+            if (i != "") {
+
+                if (regexFormatTime.test(i)) {
+
+                    modifiedSubtitle[modifiedSubtitle.indexOf(i) + 1] = "<font color=#" + subtitleColor + ">" + arr[modifiedSubtitle.indexOf(i) + 1] + " </font>";
+
+                }
 
 
-    for (let i of legendaModificada) {
+                else if (regexFormatColor.test(modifiedSubtitle[modifiedSubtitle.indexOf(i) - 1])) {
 
-        if (i != "") {
+                    modifiedSubtitle[modifiedSubtitle.indexOf(i)] = "<font color=#" + subtitleColor + ">" + arr[modifiedSubtitle.indexOf(i)] + " </font>";
 
-            if (regexFormatTime.test(i)) {
-
-                auxiliar = "<font color=#"+subtitleColor+">" + arr[legendaModificada.indexOf(i) + 1] + " </font>";
-
-                legendaModificada[legendaModificada.indexOf(i) + 1] = auxiliar;
-
+                }
             }
 
-
-            else if (regexFormatColor.test(legendaModificada[legendaModificada.indexOf(i) - 1])) {
-
-                auxiliar = "<font color=#"+subtitleColor+">" + arr[legendaModificada.indexOf(i)] + " </font>";
-                legendaModificada[legendaModificada.indexOf(i)] = auxiliar;
-
-            }
         }
 
-    }
+        const writeStream = fs.createWriteStream("modified" + subtitleName);
 
-    const writeStream = fs.createWriteStream('legendaModificada.srt');
+        const pathName = writeStream.path;
 
-    const pathName = writeStream.path;
+        modifiedSubtitle.forEach(value => writeStream.write(`${value}\n`));
 
-    // write each value of the array on the file breaking line
-    legendaModificada.forEach(value => writeStream.write(`${value}\n`));
+        writeStream.on('finish', () => {
+            console.log(`wrote all the array data to file ${pathName}`);
+        });
 
-    // the finish event is emitted when all data has been flushed from the stream
-    writeStream.on('finish', () => {
-        console.log(`wrote all the array data to file ${pathName}`);
+        writeStream.on('error', (err) => {
+            console.error(`There is an error writing the file ${pathName} => ${err}`)
+        });
+
+        writeStream.end();
+
     });
-
-    // handle the errors on the write process
-    writeStream.on('error', (err) => {
-        console.error(`There is an error writing the file ${pathName} => ${err}`)
-    });
-
-    // close the stream
-    writeStream.end();
-
-});
 
 }
+
+initialInterface();
