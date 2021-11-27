@@ -11,12 +11,11 @@ function initialInterface() {
         output: process.stdout
     });
 
-
     rl.question("Digite o código Hexadecimal da cor desejada para a legenda (com #): ", (subtitleColor) => {
 
         rl.question("Digite o nome da legenda que pretende modificar (com o formato): ", (subtitleName) => {
 
-            generateModifiedSubtitle(subtitleColor,subtitleName);
+            generateModifiedSubtitle(subtitleColor, subtitleName);
 
             rl.close();
 
@@ -30,7 +29,7 @@ function generateModifiedSubtitle(subtitleColor, subtitleName) {
 
     const fs = require('fs');
 
-    fs.readFile(subtitleName, function (err, data) {
+    fs.readFile(subtitleName, { encoding: 'latin1' }, function (err, data) {
 
         if (err) throw err;
 
@@ -39,7 +38,7 @@ function generateModifiedSubtitle(subtitleColor, subtitleName) {
         let modifiedSubtitle = arr.slice();
 
         let regexFormatTime = new RegExp('[0-9]{2}[:][0-9]{2}[:][0-9]{2}[,][0-9]{3}');
-        
+
         let regexFormatColor = new RegExp('</font>');
 
         for (let i of modifiedSubtitle) {
@@ -48,14 +47,14 @@ function generateModifiedSubtitle(subtitleColor, subtitleName) {
 
                 if (regexFormatTime.test(i)) {
 
-                    modifiedSubtitle[modifiedSubtitle.indexOf(i) + 1] = "<font color=#" + subtitleColor + ">" + arr[modifiedSubtitle.indexOf(i) + 1] + " </font>";
+                    modifiedSubtitle[modifiedSubtitle.indexOf(i) + 1] = arr[modifiedSubtitle.indexOf(i) + 1].fontcolor(subtitleColor);
 
                 }
 
 
                 else if (regexFormatColor.test(modifiedSubtitle[modifiedSubtitle.indexOf(i) - 1])) {
 
-                    modifiedSubtitle[modifiedSubtitle.indexOf(i)] = "<font color=#" + subtitleColor + ">" + arr[modifiedSubtitle.indexOf(i)] + " </font>";
+                    modifiedSubtitle[modifiedSubtitle.indexOf(i)] = arr[modifiedSubtitle.indexOf(i)].fontcolor(subtitleColor);
 
                 }
             }

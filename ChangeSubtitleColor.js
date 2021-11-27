@@ -15,7 +15,7 @@ function initialInterface() {
 }
 function generateModifiedSubtitle(subtitleColor, subtitleName) {
     var fs = require('fs');
-    fs.readFile(subtitleName, function (err, data) {
+    fs.readFile(subtitleName, { encoding: 'latin1' }, function (err, data) {
         if (err)
             throw err;
         var arr = data.toString().replace(/\r\n/g, '\n').split('\n');
@@ -26,10 +26,10 @@ function generateModifiedSubtitle(subtitleColor, subtitleName) {
             var i = modifiedSubtitle_1[_i];
             if (i != "") {
                 if (regexFormatTime.test(i)) {
-                    modifiedSubtitle[modifiedSubtitle.indexOf(i) + 1] = "<font color=#" + subtitleColor + ">" + arr[modifiedSubtitle.indexOf(i) + 1] + " </font>";
+                    modifiedSubtitle[modifiedSubtitle.indexOf(i) + 1] = arr[modifiedSubtitle.indexOf(i) + 1].fontcolor(subtitleColor);
                 }
                 else if (regexFormatColor.test(modifiedSubtitle[modifiedSubtitle.indexOf(i) - 1])) {
-                    modifiedSubtitle[modifiedSubtitle.indexOf(i)] = "<font color=#" + subtitleColor + ">" + arr[modifiedSubtitle.indexOf(i)] + " </font>";
+                    modifiedSubtitle[modifiedSubtitle.indexOf(i)] = arr[modifiedSubtitle.indexOf(i)].fontcolor(subtitleColor);
                 }
             }
         }
